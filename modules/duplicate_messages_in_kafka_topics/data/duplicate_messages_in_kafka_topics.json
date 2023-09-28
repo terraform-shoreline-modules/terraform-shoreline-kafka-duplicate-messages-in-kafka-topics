@@ -1,0 +1,150 @@
+{
+  "name": "duplicate_messages_in_kafka_topics",
+  "description": "Duplicate messages in Kafka topics occur when one or more identical messages are written to the same Kafka topic. This can happen due to various reasons such as incorrect configuration of producers and consumers, network issues, or software bugs. Duplicate messages can cause issues in the downstream systems that consume data from Kafka topics, leading to data inconsistencies and other problems. It is important to monitor Kafka topics for duplicate messages and take appropriate measures to prevent them.",
+  "params": [
+    {
+      "name": "KAFKA_BROKER_HOST",
+      "value": ""
+    },
+    {
+      "name": "ZOOKEEPER_PORT",
+      "value": ""
+    },
+    {
+      "name": "KAFKA_LOG_DIRECTORY",
+      "value": ""
+    },
+    {
+      "name": "KAFKA_BROKER_PORT",
+      "value": ""
+    },
+    {
+      "name": "TOPIC_NAME",
+      "value": ""
+    },
+    {
+      "name": "CONSUMER_GROUP",
+      "value": ""
+    },
+    {
+      "name": "ZOOKEEPER_HOST",
+      "value": ""
+    },
+    {
+      "name": "HOST_NAME",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Duplicate Messages in Kafka Topics\nDuplicate messages in Kafka topics occur when one or more identical messages are written to the same Kafka topic. This can happen due to various reasons such as incorrect configuration of producers and consumers, network issues, or software bugs. Duplicate messages can cause issues in the downstream systems that consume data from Kafka topics, leading to data inconsistencies and other problems. It is important to monitor Kafka topics for duplicate messages and take appropriate measures to prevent them."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if Kafka is running"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `systemctl status kafka.service`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## List topics in Kafka"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `kafka-topics.sh --list --zookeeper ${ZOOKEEPER_HOST}:${ZOOKEEPER_PORT}`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the number of replicas for a specific topic"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `kafka-topics.sh --describe --zookeeper ${ZOOKEEPER_HOST}:${ZOOKEEPER_PORT} --topic ${TOPIC_NAME}`"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the number of partitions for a specific topic"
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `kafka-topics.sh --describe --zookeeper ${ZOOKEEPER_HOST}:${ZOOKEEPER_PORT} --topic ${TOPIC_NAME}`"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the consumer groups and their offsets for a specific topic"
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `kafka-consumer-groups.sh --bootstrap-server ${KAFKA_BROKER_HOST}:${KAFKA_BROKER_PORT} --describe --group ${CONSUMER_GROUP} --topic ${TOPIC_NAME}`"
+    },
+    {
+      "name": "cell_12",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the Kafka logs for errors or warnings"
+    },
+    {
+      "name": "cell_13",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `tail -f /var/log/kafka/kafka.log`"
+    },
+    {
+      "name": "cell_14",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Multiple producers are publishing the same message to the same topic, resulting in duplicates."
+    },
+    {
+      "name": "cell_15",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_kafka_duplicate_checker($ZOOKEEPER_PORT, $KAFKA_LOG_DIRECTORY, $TOPIC_NAME, $ZOOKEEPER_HOST)"
+    },
+    {
+      "name": "cell_16",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Implement message deduplication at the consumer end to prevent duplicate messages from being processed."
+    },
+    {
+      "name": "cell_17",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_kafka_consumer_dedup($KAFKA_BROKER_HOST, $KAFKA_BROKER_PORT, $TOPIC_NAME, $CONSUMER_GROUP)"
+    }
+  ]
+}
