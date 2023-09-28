@@ -3,15 +3,23 @@
   "description": "Duplicate messages in Kafka topics occur when one or more identical messages are written to the same Kafka topic. This can happen due to various reasons such as incorrect configuration of producers and consumers, network issues, or software bugs. Duplicate messages can cause issues in the downstream systems that consume data from Kafka topics, leading to data inconsistencies and other problems. It is important to monitor Kafka topics for duplicate messages and take appropriate measures to prevent them.",
   "params": [
     {
-      "name": "KAFKA_BROKER_HOST",
-      "value": ""
-    },
-    {
       "name": "ZOOKEEPER_PORT",
       "value": ""
     },
     {
+      "name": "ZOOKEEPER_HOST",
+      "value": ""
+    },
+    {
+      "name": "CONSUMER_GROUP",
+      "value": ""
+    },
+    {
       "name": "KAFKA_LOG_DIRECTORY",
+      "value": ""
+    },
+    {
+      "name": "KAFKA_BROKER_HOST",
       "value": ""
     },
     {
@@ -20,14 +28,6 @@
     },
     {
       "name": "TOPIC_NAME",
-      "value": ""
-    },
-    {
-      "name": "CONSUMER_GROUP",
-      "value": ""
-    },
-    {
-      "name": "ZOOKEEPER_HOST",
       "value": ""
     },
     {
@@ -132,7 +132,7 @@
       "name": "cell_15",
       "type": "OP_LANG",
       "enabled": true,
-      "content": "host | host_name=$HOST_NAME | invoke_kafka_duplicate_checker($ZOOKEEPER_PORT, $KAFKA_LOG_DIRECTORY, $TOPIC_NAME, $ZOOKEEPER_HOST)"
+      "content": "host | host_name=$HOST_NAME | invoke_kafka_duplicate_producers($ZOOKEEPER_PORT, $ZOOKEEPER_HOST, $KAFKA_LOG_DIRECTORY, $TOPIC_NAME)"
     },
     {
       "name": "cell_16",
@@ -144,7 +144,7 @@
       "name": "cell_17",
       "type": "OP_LANG",
       "enabled": true,
-      "content": "host | host_name=$HOST_NAME | invoke_kafka_consumer_dedup($KAFKA_BROKER_HOST, $KAFKA_BROKER_PORT, $TOPIC_NAME, $CONSUMER_GROUP)"
+      "content": "host | host_name=$HOST_NAME | invoke_kafka_consumer_deduplication($CONSUMER_GROUP, $KAFKA_BROKER_HOST, $KAFKA_BROKER_PORT, $TOPIC_NAME)"
     }
   ]
 }
